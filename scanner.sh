@@ -12,11 +12,11 @@ print_logo() {
     echo -e "${BLUE}  _   _      _     ____                                  "
     echo -e " | \ | | ___| |_  / ___|  ___ ____ ____  ____   ___ ____ "
     echo -e " |  \| |/ _ \ __| \___ \ / __/ _  |  _ \|  _ \ / _ \  __|"
-    echo -e " | |\  |  __/ |_   ___) | (_| (_| | | | | | |  __/ |   "
+    echo -e " | |\  |  __/ |_   ___) | (_| (_| | | | | | | |  __/ |   "
     echo -e " |_| \_|\___|\__| |____/ \___\____|_| |_|_| |_|\___|_|   ${NC}"
 }
 
-# Function to print menu
+# Function to print main menu
 print_menu() {
     echo
     echo -e "${GREEN}========================================${NC}"
@@ -46,11 +46,17 @@ while true; do
         echo -e "${GREEN}[*] Scanning localhost for open ports...${NC}"
         sleep 0.5
 
+        LOGFILE="logfile.txt"
+        echo "==============================================" >> "$LOGFILE"
+        echo "Scan started: $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOGFILE"
+        echo "Target: localhost" >> "$LOGFILE"
+        echo "==============================================" >> "$LOGFILE"
+
         # Print header
-        printf "%-8s %-8s %-8s\n" PORT STATE SERVICE
+        printf "%-8s %-8s %-8s\n" PORT STATE SERVICE | tee -a "$LOGFILE"
 
         # Run nmap and process output
-        nmap -Pn -p- -oG - localhost | awk -v GREEN="$GREEN" -v YELLOW="$YELLOW" -v NC="$NC" '
+        nmap -Pn -p- -oG - localhost | awk -v GREEN="$GREEN" -v YELLOW="$YELLOW" -v NC="$NC" -v LOG="$LOGFILE" '
         /Ports:/ {
             split($0,a,"Ports: ");
             n = split(a[2], ports, ", ");
@@ -76,15 +82,24 @@ while true; do
                     else
                         color=YELLOW
 
-                    printf color "%-8s %-8s %-8s%s" NC "\n", port, state, service, warning;
+                    # Print colored output
+                    printf color "%-8s %-8s %-8s%s" NC "\n", port, state, service, warning
+
+                    # Log plain text
+                    printf "%-8s %-8s %-8s%s\n", port, state, service, warning >> LOG
                 }
             }
         }'
 
-        # After option completes, reset screen
+        echo "Scan finished: $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOGFILE"
+        echo "==============================================" >> "$LOGFILE"
+
         sleep 1
+        clear
+        print_logo
 
     elif [[ "$input" == "2" ]]; then
+        # Firewall submenu
         while true; do
             echo
             echo -e "${GREEN}--- Firewall Control ---${NC}"
