@@ -7,7 +7,7 @@ GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-# Function to print logo
+# print logo
 print_logo() {
     echo -e "${BLUE}  _   _      _     ____                                  "
     echo -e " | \ | | ___| |_  / ___|  ___ ____ ____  ____   ___ ____ "
@@ -16,7 +16,7 @@ print_logo() {
     echo -e " |_| \_|\___|\__| |____/ \___\____|_| |_|_| |_|\___|_|   ${NC}"
 }
 
-# Function to print main menu
+# menu function
 print_menu() {
     echo
     echo -e "${GREEN}========================================${NC}"
@@ -28,7 +28,7 @@ print_menu() {
     echo -ne "${GREEN}>> ${NC}"
 }
 
-# Initial screen
+# main menu
 clear
 print_logo
 
@@ -52,10 +52,10 @@ while true; do
         echo "Target: localhost" >> "$LOGFILE"
         echo "==============================================" >> "$LOGFILE"
 
-        # Print header
+        # header
         printf "%-8s %-8s %-8s\n" PORT STATE SERVICE | tee -a "$LOGFILE"
 
-        # Run nmap and process output
+        # process output
         nmap -Pn -p- -oG - localhost | awk -v GREEN="$GREEN" -v YELLOW="$YELLOW" -v NC="$NC" -v LOG="$LOGFILE" '
         /Ports:/ {
             split($0,a,"Ports: ");
@@ -82,10 +82,10 @@ while true; do
                     else
                         color=YELLOW
 
-                    # Print colored output
+                    # colored output
                     printf color "%-8s %-8s %-8s%s" NC "\n", port, state, service, warning
 
-                    # Log plain text
+                    # log plain text
                     printf "%-8s %-8s %-8s%s\n", port, state, service, warning >> LOG
                 }
             }
@@ -99,7 +99,7 @@ while true; do
         print_logo
 
     elif [[ "$input" == "2" ]]; then
-        # Firewall submenu
+        # ufw submenu
         while true; do
             echo
             echo -e "${GREEN}--- Firewall Control ---${NC}"
@@ -116,14 +116,14 @@ while true; do
                 print_logo
             elif [[ "$fw_input" == "1" ]]; then
                 echo -e "${GREEN}[*] Enabling firewall...${NC}"
-                # sudo ufw enable
+                sudo ufw enable
                 sleep 1
                 clear
                 print_logo
                 break
             elif [[ "$fw_input" == "2" ]]; then
                 echo -e "${GREEN}[*] Disabling firewall...${NC}"
-                # sudo ufw disable
+                sudo ufw disable
                 sleep 1
                 clear
                 print_logo
